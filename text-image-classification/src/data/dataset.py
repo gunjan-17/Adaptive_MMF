@@ -68,7 +68,7 @@ class JsonlDataset(Dataset):
             segment = torch.zeros(len(sentence))
         # Process text for other tasks
         else:
-            ext = self.data[index]["text"]
+            text = self.data[index]["text"]
 
             # ===== Noise Injection  =====
             if self.args.noise_level > 0.0 and self.mode == "test":
