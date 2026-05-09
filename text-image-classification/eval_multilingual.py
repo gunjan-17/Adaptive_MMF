@@ -95,7 +95,7 @@ def main():
     noise_levels = [0.0, 5.0, 10.0]
 
     for lang_name, test_file in test_files.items():
-        test_path = f"{args.data_path}/food101/{test_file}"
+        test_path = f"{args.data_path}/MVSA_Single/{test_file}"
 
         # Check file exists
         import os
