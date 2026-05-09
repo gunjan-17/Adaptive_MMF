@@ -54,6 +54,17 @@ class ImageClf(nn.Module):
 
     def forward(self, x):
         x = self.img_encoder(x)
-        x = torch.flatten(x, start_dim=1)
-        out = self.clf(x)
-        return out
+        x_flat = torch.flatten(x, start_dim=1)    # [batch, N*2048]
+
+        feat_var = torch.var(x_flat, dim=1, keepdim=True)  # [batch, 1]
+        feat_mean = torch.mean(torch.abs(x_flat), dim=1, keepdim=True)
+
+        quality = torch.sigmoid(feat_mean / (feat_var + 1e-6))
+
+        x_enhanced = x_flat * quality
+
+        logits = self.clf(x_enhanced)
+
+        pre_fusion_uncertainty = 1.0 - quality.squeeze(1)
+
+        return logits

@@ -14,7 +14,7 @@ from collections import Counter
 
 import torch
 import torchvision.transforms as transforms
-from pytorch_pretrained_bert import BertTokenizer
+from transformers import AutoTokenizer
 from torch.utils.data import DataLoader
 
 from src.data.dataset import JsonlDataset,AddGaussianNoise,AddSaltPepperNoise
@@ -87,12 +87,11 @@ def get_glove_words(path):
 def get_vocab(args):
     vocab = Vocab()
     if args.model in ["bert", "mmbt", "concatbert","latefusion",'tmc']:
-        bert_tokenizer = BertTokenizer.from_pretrained(
-            args.bert_model, do_lower_case=True
-        )
-        vocab.stoi = bert_tokenizer.vocab
-        vocab.itos = bert_tokenizer.ids_to_tokens
-        vocab.vocab_sz = len(vocab.itos)
+        hf_tokenizer = AutoTokenizer.from_pretrained("ai4bharat/indic-bert", dtype="auto", use_safetensors=True)
+
+        vocab.stoi = hf_tokenizer.get_vocab()
+        vocab.itos = {v: k for k, v in vocab.stoi.items()}
+        vocab.vocab_sz = len(vocab.stoi)
 
     else:
         word_list = get_glove_words(args.glove_path)
@@ -131,12 +130,9 @@ def collate_fn(batch, args):
 
 
 def get_data_loaders(args):
-    tokenizer = (
-        # BertTokenizer.from_pretrained(args.bert_model, do_lower_case=True).tokenize
-        BertTokenizer.from_pretrained(args.bert_model, do_lower_case=True).tokenize
-        if args.model in ["bert", "mmbt", "concatbert","latefusion",'tmc']
-        else str.split
-    )
+    hf_tokenizer = AutoTokenizer.from_pretrained("ai4bharat/indic-bert", dtype="auto", use_safetensors=True)
+
+    tokenizer = hf_tokenizer
 
     transforms = get_transforms()
 

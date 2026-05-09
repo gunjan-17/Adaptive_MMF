@@ -8,22 +8,21 @@
 #
 
 import torch.nn as nn
-from pytorch_pretrained_bert.modeling import BertModel
+from transformers import AutoModel
 
 
 class BertEncoder(nn.Module):
     def __init__(self, args):
         super(BertEncoder, self).__init__()
         self.args = args
-        self.bert = BertModel.from_pretrained(args.bert_model)
+        self.bert = AutoModel.from_pretrained("ai4bharat/indic-bert", dtype="auto", use_safetensors=True)
 
-    def forward(self, txt, mask, segment):
-        _, out = self.bert(
-            txt,
-            token_type_ids=segment,
-            attention_mask=mask,
-            output_all_encoded_layers=False,
+    def forward(self, txt, mask, segment=None):
+        outputs = self.bert(
+            input_ids=txt,
+            attention_mask=mask
         )
+        out = outputs.last_hidden_state[:, 0, :]
         return out
 
 
@@ -37,4 +36,15 @@ class BertClf(nn.Module):
 
     def forward(self, txt, mask, segment):
         x = self.enc(txt, mask, segment)
-        return self.clf(x)
+        feat_var = torch.var(x, dim=1, keepdim=True)
+        feat_mean = torch.mean(torch.abs(x), dim=1, keepdim=True)
+        
+        quality = torch.sigmoid(feat_mean / (feat_var + 1e-6))
+
+        x_enhanced = x * quality
+
+        logits = self.clf(x_enhanced)
+
+        pre_fusion_uncertainty = 1.0 - quality.squeeze(1) 
+
+        return logits

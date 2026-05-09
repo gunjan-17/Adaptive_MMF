@@ -28,10 +28,7 @@ class JsonlDataset(Dataset):
         self.data_dir = os.path.dirname(data_path)
         self.tokenizer = tokenizer
         self.args = args
-        self.vocab = vocab
         self.n_classes = len(args.labels)
-        # Text prefix token depends on model type
-        self.text_start_token = ["[CLS]"] if args.model != "mmbt" else ["[SEP]"]
         self.mode = mode
 
         # Randomly drop images during training based on drop rate
@@ -56,44 +53,44 @@ class JsonlDataset(Dataset):
         
         # Process text for VSNLI task (paired sentences)
         if self.args.task == "vsnli":
-            sent1 = self.tokenizer(self.data[index]["sentence1"])
-            sent2 = self.tokenizer(self.data[index]["sentence2"])
-            truncate_seq_pair(sent1, sent2, self.args.max_seq_len - 3)
-            sentence = self.text_start_token + sent1 + ["[SEP]"] + sent2 + ["[SEP]"]
-            segment = torch.cat(
-                [torch.zeros(2 + len(sent1)), torch.ones(len(sent2) + 1)]
+            sent1 = self.data[index]["sentence1"]
+            sent2 = self.data[index]["sentence2"]
+
+            encoding = self.tokenizer(
+                sent1,
+                sent2,
+                add_special_tokens=True,
+                max_length=self.args.max_seq_len,
+                truncation=True,
             )
+
+            sentence = torch.LongTensor(encoding["input_ids"])
+            segment = torch.zeros(len(sentence))
         # Process text for other tasks
         else:
-            _ = self.tokenizer(self.data[index]["text"])
+            ext = self.data[index]["text"]
 
-            # Apply word replacement noise in test mode
-            if self.args.noise_level > 0.0 and self.mode=="test":
-                # Random chance to apply noise
+            # ===== Noise Injection  =====
+            if self.args.noise_level > 0.0 and self.mode == "test":
                 if np.random.choice([0, 1], p=[0.5, 0.5]):
-                    wordlist = self.data[index]["text"].split(' ')
+                    wordlist = text.split(' ')
                     for i in range(len(wordlist)):
-                        # Determine replacement probability
                         replace_p = 0.1 * self.args.noise_level
-                        replace_flag = np.random.choice(
-                            [0, 1], 
-                            p=[1-replace_p, replace_p]
-                        )
-                        # Replace word with underscore
-                        if replace_flag:
+                        if np.random.choice([0, 1], p=[1-replace_p, replace_p]):
                             wordlist[i] = '_'
-                    _ = ' '.join(wordlist)
-                    _ = self.tokenizer(_)
+                    text = ' '.join(wordlist)
 
-            # Add start token and truncate
-            sentence = self.text_start_token + _[:(self.args.max_seq_len - 1)]
-            segment = torch.zeros(len(sentence))
+            # ===== TOKENIZATION  =====
+            encoding = self.tokenizer(
+                text,
+                add_special_tokens=True,
+                max_length=self.args.max_seq_len,
+                truncation=True,
+            )
 
-        # Convert tokens to vocabulary indices
-        sentence = torch.LongTensor([
-            self.vocab.stoi[w] if w in self.vocab.stoi else self.vocab.stoi["[UNK]"]
-            for w in sentence
-        ])
+            sentence = torch.LongTensor(encoding["input_ids"])
+            segment = torch.zeros(len(sentence))  
+
 
         # Handle multi-label vs single-label tasks
         if self.args.task_type == "multilabel":
