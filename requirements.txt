@@ -1,0 +1,9 @@
+Pillow
+torch
+torchaudio
+torchmetrics
+torchvision
+tqdm
+transformers
+scikit-learn
+pytorch_pretrained_bert
