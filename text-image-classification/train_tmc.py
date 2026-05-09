@@ -218,7 +218,7 @@ def train(args):
     start_epoch, global_step, n_no_improve, best_metric = 0, 0, 0, -np.inf
 
     if os.path.exists(os.path.join(args.savedir, "checkpoint.pt")):
-        checkpoint = torch.load(os.path.join(args.savedir, "checkpoint.pt"))
+        checkpoint = torch.load(os.path.join(args.savedir, "checkpoint.pt"), weights_only=False)
         start_epoch = checkpoint["epoch"]
         n_no_improve = checkpoint["n_no_improve"]
         best_metric = checkpoint["best_metric"]

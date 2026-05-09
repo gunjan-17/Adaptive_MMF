@@ -34,7 +34,7 @@ def save_checkpoint(state, is_best, checkpoint_path, filename="checkpoint.pt"):
 
 
 def load_checkpoint(model, path):
-    best_checkpoint = torch.load(path)
+    best_checkpoint = torch.load(path, weights_only=False)
     model.load_state_dict(best_checkpoint["state_dict"])
 
 

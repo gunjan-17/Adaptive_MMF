@@ -113,7 +113,6 @@ def get_scheduler(optimizer: optim.Optimizer, args: argparse.Namespace) -> optim
         optimizer, 
         mode="max", 
         patience=args.lr_patience, 
-        verbose=True, 
         factor=args.lr_factor
     )
 
@@ -302,7 +301,7 @@ def train(args: argparse.Namespace) -> None:
     start_epoch, global_step, no_improve_count, best_metric = 0, 0, 0, -np.inf
     checkpoint_path = os.path.join(args.savedir, "checkpoint.pt")
     if os.path.exists(checkpoint_path):
-        checkpoint = torch.load(checkpoint_path)
+        checkpoint = torch.load(checkpoint_path, weights_only=False)
         start_epoch = checkpoint["epoch"]
         no_improve_count = checkpoint["n_no_improve"]
         best_metric = checkpoint["best_metric"]
