@@ -37,4 +37,15 @@ class BertClf(nn.Module):
 
     def forward(self, txt, mask, segment=None):
         x = self.enc(txt, mask, segment)
-        return self.clf(x)
+        feat_var = torch.var(x, dim=1, keepdim=True)
+        feat_mean = torch.mean(torch.abs(x), dim=1, keepdim=True)
+        
+        quality = torch.sigmoid(feat_mean / (feat_var + 1e-6))
+
+        x_enhanced = x * quality
+
+        logits = self.clf(x_enhanced)
+
+        pre_fusion_uncertainty = 1.0 - quality.squeeze(1) 
+
+        return logits
