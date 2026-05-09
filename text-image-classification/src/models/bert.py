@@ -32,9 +32,9 @@ class BertClf(nn.Module):
         self.args = args
         self.enc = BertEncoder(args)
         self.clf = nn.Linear(args.hidden_sz, args.n_classes)
-        self.clf.apply(self.enc.bert.init_bert_weights)
+        init.xavier_uniform_(self.clf.weight)
 
-    def forward(self, txt, mask, segment):
+    def forward(self, txt, mask, segment=None):
         x = self.enc(txt, mask, segment)
         feat_var = torch.var(x, dim=1, keepdim=True)
         feat_mean = torch.mean(torch.abs(x), dim=1, keepdim=True)
