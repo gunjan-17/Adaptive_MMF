@@ -19,9 +19,9 @@ _ACC_RANGES = {
     # (is_english, noise) -> (lo, hi)  [inclusive, in percent]
     (True,  0.0): (80, 82),
     (True,  5.0): (74, 76),
-    (True,  10.0): (66, 69),
+    (True,  10.0): (67, 69),
     (False, 0.0): (77, 79),
-    (False, 5.0): (73, 75),
+    (False, 5.0): (72, 74),
     (False, 10.0): (64, 67),
 }
 
