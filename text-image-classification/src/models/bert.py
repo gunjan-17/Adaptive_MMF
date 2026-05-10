@@ -16,7 +16,7 @@ class BertEncoder(nn.Module):
     def __init__(self, args):
         super(BertEncoder, self).__init__()
         self.args = args
-        self.bert = AutoModel.from_pretrained("google/muril-base-cased", dtype="auto", use_safetensors=True)
+        self.bert = AutoModel.from_pretrained("ai4bharat/indic-bert", dtype="auto", use_safetensors=True)
 
     def forward(self, txt, mask, segment=None):
         outputs = self.bert(
