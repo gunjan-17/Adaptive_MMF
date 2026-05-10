@@ -12,6 +12,7 @@ from .bow import GloveBowClf
 from .concat_bert import MultimodalConcatBertClf
 from .concat_bow import  MultimodalConcatBowClf
 from .image import ImageClf
+#from .uncertainty import ImageUncertaintyModule, TextUncertaintyModule
 from .mmbt import MultimodalBertClf
 from .late_fusion import MultimodalLateFusionClf
 from .tmc import TMC,ce_loss
