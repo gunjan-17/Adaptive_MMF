@@ -60,8 +60,8 @@ def get_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--df", type=bool, default=True, help="Use dynamic fusion (if applicable)")
     parser.add_argument("--noise_level", type=float, default=0.5, help="Noise level for testing")
     parser.add_argument("--noise_type", type=str, default='Gaussian', help="Noise type for testing")
-    parser.add_argument("--modality_dropout", type=float, default=0.15, help="Probability of dropping each modality during training")
-    parser.add_argument("--txt_loss_weight", type=float, default=2.0, help="Weight for text classification loss")
+    #parser.add_argument("--modality_dropout", type=float, default=0.15, help="Probability of dropping each modality during training")
+    #parser.add_argument("--txt_loss_weight", type=float, default=2.0, help="Weight for text classification loss")
 
 def get_criterion(args: argparse.Namespace) -> nn.Module:
     """Create loss function based on task type"""
@@ -229,15 +229,15 @@ def model_forward(
         output = model(text, mask, segment, image)
     elif args.model == "latefusion":
         # Late fusion returns multiple outputs
-        if mode == 'train' and args.modality_dropout > 0:
-            rand = torch.rand(1).item()
-            if rand < args.modality_dropout:
-                # Zero out image → force text learning
-                image = torch.zeros_like(image)
-            elif rand < args.modality_dropout * 2:
-                # Zero out text → force image learning
-                text  = torch.zeros_like(text)
-                mask  = torch.zeros_like(mask)
+        # if mode == 'train' and args.modality_dropout > 0:
+        #     rand = torch.rand(1).item()
+        #     if rand < args.modality_dropout:
+        #         # Zero out image → force text learning
+        #         image = torch.zeros_like(image)
+        #     elif rand < args.modality_dropout * 2:
+        #         # Zero out text → force image learning
+        #         text  = torch.zeros_like(text)
+        #         mask  = torch.zeros_like(mask)
         text_img_logits, text_logits, image_logits, text_conf, image_conf = model(
             text, mask, segment, image
         )
@@ -257,9 +257,7 @@ def model_forward(
         joint_clf_loss = criterion(text_img_logits, target)
         
         # Calculate total classification loss
-        clf_loss = (args.txt_loss_weight * text_clf_loss +
-            image_clf_loss +
-            joint_clf_loss)
+        clf_loss = text_clf_loss + image_clf_loss + joint_clf_loss
         
         # For training mode, calculate losses per sample and update history
         if mode == 'train':
