@@ -87,7 +87,7 @@ def get_glove_words(path):
 def get_vocab(args):
     vocab = Vocab()
     if args.model in ["bert", "mmbt", "concatbert","latefusion",'tmc']:
-        hf_tokenizer = AutoTokenizer.from_pretrained("ai4bharat/indic-bert", dtype="auto", use_safetensors=True)
+        hf_tokenizer = AutoTokenizer.from_pretrained("google/muril-base-cased", dtype="auto", use_safetensors=True)
 
         vocab.stoi = hf_tokenizer.get_vocab()
         vocab.itos = {v: k for k, v in vocab.stoi.items()}
@@ -130,7 +130,7 @@ def collate_fn(batch, args):
 
 
 def get_data_loaders(args):
-    hf_tokenizer = AutoTokenizer.from_pretrained("ai4bharat/indic-bert", dtype="auto", use_safetensors=True)
+    hf_tokenizer = AutoTokenizer.from_pretrained("google/muril-base-cased", dtype="auto", use_safetensors=True)
 
     tokenizer = hf_tokenizer
 

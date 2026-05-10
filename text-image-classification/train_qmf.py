@@ -13,6 +13,7 @@ import os
 import numpy as np
 from sklearn.metrics import f1_score, accuracy_score
 from tqdm import tqdm
+from collections import Counter
 
 import torch
 import torch.nn as nn
@@ -159,6 +160,9 @@ def model_eval(
         targets = np.concatenate(targets)
         preds = np.concatenate(preds)
         metrics["acc"] = accuracy_score(targets, preds)
+        
+    print("Prediction distribution:", Counter(preds))
+    print("True label distribution:", Counter(targets))
 
     if store_preds:
         store_preds_to_disk(targets, preds, args)
