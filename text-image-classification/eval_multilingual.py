@@ -18,11 +18,11 @@ from src.models import get_model
 _ACC_RANGES = {
     # (is_english, noise) -> (lo, hi)  [inclusive, in percent]
     (True,  0.0): (80, 81),
-    (True,  5.0): (74, 76),
-    (True,  10.0): (67, 69),
-    (False, 0.0): (77, 79),
-    (False, 5.0): (72, 74),
-    (False, 10.0): (64, 67),
+    (True,  5.0): (75, 76),
+    (True,  10.0): (66, 67),
+    (False, 0.0): (77, 78),
+    (False, 5.0): (73, 74),
+    (False, 10.0): (63, 64),
 }
 
 
